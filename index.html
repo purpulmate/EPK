@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purpulmate — EPK</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,800&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+
+  <style>
+    :root {
+      /* ── Palette sampled from the PURPULMATE cover artwork ── */
+      --lilac:#E7C4DB;
+      --lilac-2:#E0B8D2;
+      --cream:#FBF6DF;
+      --cream-2:#FFFBE6;
+      --ink:#1C1A18;
+      --ink-soft:#4F4942;
+      --cobalt:#0A5DAE;
+      --cobalt-deep:#0C3A6B;
+      --orange:#C2691C;
+      --orange-bright:#F2924B;
+      --gold:#F2B14E;
+      --green:#143C2A;
+      --green-soft:#2F6B47;
+      --mint:#BFE0C0;
+      --line:rgba(28,26,24,0.17);
+      --line-strong:rgba(28,26,24,0.34);
+
+      --maxw:1180px;
+      --pad:clamp(26px,6vw,80px);
+      --sec-y:clamp(58px,9vw,108px);
+      --display:"Anton",sans-serif;
+      --body:"Archivo",sans-serif;
+      --pixel:"Silkscreen","Archivo",monospace;
+
+      --grain-opacity:0.05;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust:100%; overflow-x:hidden; }
+
+    body {
+      background: var(--lilac);
+      color: var(--ink);
+      font-family: var(--body);
+      font-size: clamp(15px,0.5vw + 13.5px,17px);
+      line-height: 1.66;
+      overflow-x: hidden;
+      overflow-wrap: break-word;
+      position: relative;
+    }
+
+    /* ── Cover-style background: cream squiggles + grain ── */
+    body::before {
+      content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.5;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='760' height='760' viewBox='0 0 760 760'%3E%3Cg fill='none' stroke='%23FBF6DF' stroke-width='7' stroke-linecap='round' opacity='0.6'%3E%3Cpath d='M-20 150 C 120 80, 240 220, 380 150 S 640 80, 800 160'/%3E%3Cpath d='M-20 360 C 140 300, 250 440, 400 370 S 660 300, 800 380'/%3E%3Cpath d='M-20 560 C 120 500, 260 640, 400 560 S 660 500, 800 580'/%3E%3Cpath d='M-20 680 C 160 620, 250 760, 410 690 S 660 620, 800 700'/%3E%3C/g%3E%3C/svg%3E");
+      background-size:760px 760px;
+    }
+    body::after {
+      content:""; position:fixed; inset:0; z-index:1; pointer-events:none;
+      opacity:var(--grain-opacity); mix-blend-mode:multiply;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    .wrap {
+      position:relative; z-index:2;
+      max-width:var(--maxw); margin:0 auto;
+      padding-left:var(--pad); padding-right:var(--pad);
+    }
+
+    /* ── Type primitives ── */
+    .pixel { font-family:var(--pixel); font-size:0.62rem; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink); line-height:1.4; }
+    .pixel.co { color:var(--cobalt); }
+    .pixel.or { color:var(--orange); }
+    .pixel.cream { color:var(--cream-2); }
+    .pixel.mint { color:var(--mint); }
+
+    .rule { height:2px; background:var(--ink); opacity:0.85; border:0; width:100%; }
+    .accent-bar { display:inline-block; width:30px; height:3px; background:var(--orange); vertical-align:middle; margin-right:12px; flex-shrink:0; }
+
+    a { color:inherit; text-decoration:none; transition:.22s ease; }
+
+    /* ── Top bar ── */
+    .topbar { position:relative; z-index:3; border-bottom:2px solid var(--ink); background:var(--cream); }
+    .topbar .row { display:flex; justify-content:space-between; align-items:center; padding:11px 0; gap:14px 18px; flex-wrap:wrap; }
+    .topbar .mark { font-family:var(--display); font-size:1.05rem; letter-spacing:0.04em; text-transform:uppercase; color:var(--ink); }
+    .topbar .mark span { color:var(--cobalt); }
+
+    /* ── Section frame ── */
+    section { padding:var(--sec-y) 0; position:relative; }
+    .sec-head { display:grid; grid-template-columns:auto 1fr; gap:clamp(18px,3vw,38px); align-items:start; margin-bottom:clamp(28px,4vw,48px); }
+    .sec-idx { font-family:var(--pixel); font-size:0.66rem; letter-spacing:0.02em; color:var(--orange); white-space:nowrap; padding-top:10px; }
+    .sec-title { font-family:var(--display); text-transform:uppercase; line-height:0.96; font-size:clamp(2rem,5.4vw,4rem); color:var(--ink); }
+    .sec-title em { font-style:normal; color:var(--orange); }
+    .sec-title .co { color:var(--cobalt); }
+
+    /* ── Buttons / pills ── */
+    .btn { font-family:var(--pixel); font-size:0.62rem; letter-spacing:0.02em; text-transform:uppercase; padding:13px 20px; border:3px solid var(--ink);
+      display:inline-flex; align-items:center; gap:9px; color:var(--ink); background:var(--cream); }
+    .btn:hover { transform:translate(-2px,-2px); box-shadow:4px 4px 0 0 var(--ink); }
+    .btn .arr { color:var(--orange); }
+    .btn.solid { background:var(--cobalt); color:var(--cream-2); }
+    .btn.solid .arr { color:var(--gold); }
+
+    .tagpill { font-family:var(--pixel); font-size:0.6rem; letter-spacing:0.02em; text-transform:uppercase; color:var(--ink); border:2px solid var(--ink); padding:7px 11px; line-height:1; background:transparent; }
+    .tagpill b { color:var(--cobalt); font-weight:400; }
+    .tagpill.or b { color:var(--orange); }
+
+    /* ── HERO ── */
+    .hero { padding-top:clamp(40px,6vw,72px); padding-bottom:clamp(40px,6vw,68px); }
+    .kicker-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:clamp(22px,3vw,34px); }
+    .kicker-row .sep { color:var(--orange); font-family:var(--pixel); font-size:0.6rem; }
+    .hero-grid { display:grid; grid-template-columns:1.25fr 1fr; gap:clamp(28px,5vw,60px); align-items:end; }
+
+    .display { font-family:var(--display); text-transform:uppercase; line-height:0.9; letter-spacing:0.004em;
+      font-size:clamp(3.6rem,12vw,8.6rem); color:var(--ink); }
+    .display .l2 { display:block; color:var(--cobalt); }
+    .ft { font-family:var(--body); font-weight:900; font-size:clamp(0.95rem,1.8vw,1.3rem); letter-spacing:0.02em; text-transform:uppercase;
+      color:var(--ink); margin-top:clamp(16px,2.5vw,24px); display:flex; align-items:center; gap:12px; }
+    .ft b { color:var(--orange); }
+    .tagline { font-family:var(--body); font-weight:800; font-size:clamp(1.15rem,2.2vw,1.7rem); line-height:1.26; color:var(--ink);
+      max-width:24ch; margin-top:clamp(22px,3.5vw,32px); }
+    .hero-tags { display:flex; flex-wrap:wrap; gap:9px; margin-top:clamp(22px,3vw,28px); }
+
+    .cover-col { display:flex; flex-direction:column; align-items:flex-end; gap:16px; }
+    .vortex { width:clamp(72px,9vw,104px); height:auto; }
+    .vortex .spin { transform-origin:center; animation:rot 60s linear infinite; }
+    @keyframes rot { to { transform:rotate(360deg); } }
+    .cover { position:relative; width:100%; max-width:480px; aspect-ratio:1/1; border:3px solid var(--ink); background:var(--cream);
+      box-shadow:14px 14px 0 0 var(--cobalt); overflow:hidden; }
+    .cover img { width:100%; height:100%; object-fit:cover; display:block; }
+    .cover .tag { position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:space-between; align-items:center;
+      padding:7px 11px; background:var(--ink); }
+    .cover .tag .pixel { color:var(--cream-2); }
+    .cover .tag .pixel.or { color:var(--gold); }
+
+    /* ── Streaming band ── */
+    .stream { background:var(--cobalt); color:var(--cream-2); margin-top:clamp(40px,5vw,64px); border:3px solid var(--ink);
+      box-shadow:8px 8px 0 0 var(--orange); }
+    .stream-in { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; padding:clamp(18px,2.6vw,26px) clamp(20px,3vw,30px); }
+    .stream .lbl { display:flex; align-items:center; gap:12px; }
+    .stream .lbl .accent-bar { background:var(--gold); }
+    .stream .lbl .pixel { color:var(--cream-2); font-size:0.66rem; }
+    .stream .links { display:flex; flex-wrap:wrap; gap:9px; }
+    .plat { font-family:var(--pixel); font-size:0.62rem; letter-spacing:0.02em; text-transform:uppercase; color:var(--cream-2);
+      border:2px solid var(--cream-2); padding:9px 13px; display:inline-flex; align-items:center; gap:6px; background:transparent; }
+    .plat:hover { background:var(--cream-2); color:var(--cobalt); transform:translate(-2px,-2px); }
+    .plat.primary { background:var(--gold); color:var(--ink); border-color:var(--ink); }
+    .plat.primary:hover { background:var(--cream-2); color:var(--cobalt); }
+
+    /* ── Bio ── */
+    .bio-grid { display:grid; grid-template-columns:0.85fr 1.15fr; gap:clamp(28px,5vw,60px); align-items:start; }
+    .brand-art { position:relative; aspect-ratio:3/4; overflow:hidden; border:3px solid var(--ink); background:var(--cream); box-shadow:12px 12px 0 0 var(--orange); }
+    .brand-art img { width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
+    .brand-art .tag { position:absolute; left:0; bottom:0; background:var(--ink); color:var(--cream-2); font-family:var(--pixel); font-size:0.56rem; text-transform:uppercase; padding:6px 10px; }
+    .bio-name { font-family:var(--display); text-transform:uppercase; font-size:clamp(2rem,4.2vw,3.2rem); color:var(--ink); line-height:0.9; margin-bottom:18px; }
+    .bio-name em { font-style:normal; color:var(--cobalt); display:block; }
+    .bio-text p { color:var(--ink-soft); margin-bottom:1em; max-width:54ch; }
+    .bio-text p strong { color:var(--ink); font-weight:800; }
+    .bio-text p em { font-style:normal; color:var(--cobalt); font-weight:700; }
+    .bio-credo { font-family:var(--display); text-transform:uppercase; font-size:clamp(1.15rem,2.2vw,1.6rem); line-height:1.0; color:var(--ink);
+      margin-top:clamp(20px,3vw,28px); padding:16px 18px; background:var(--cream); border:3px solid var(--ink); }
+    .bio-credo em { font-style:normal; color:var(--orange); }
+    .bio-meta { display:flex; flex-wrap:wrap; gap:9px; margin-top:clamp(22px,3vw,28px); }
+
+    /* ── Spotlight / Último lanzamiento ── */
+    .spot-section { }
+    .spotlight-grid { display:grid; grid-template-columns:minmax(0,420px) 1fr; gap:clamp(28px,5vw,56px); align-items:start; }
+    .spot-cover { position:relative; aspect-ratio:1/1; overflow:hidden; border:3px solid var(--ink); background:var(--cream); box-shadow:14px 14px 0 0 var(--green); }
+    .spot-cover img { width:100%; height:100%; object-fit:cover; display:block; }
+    .spot-badge { position:absolute; top:0; left:0; background:var(--gold); color:var(--ink); font-family:var(--pixel); font-size:0.58rem; letter-spacing:0.02em; text-transform:uppercase; padding:8px 12px; border-right:3px solid var(--ink); border-bottom:3px solid var(--ink); }
+    .spot-type { font-family:var(--pixel); font-size:0.62rem; color:var(--cobalt); text-transform:uppercase; }
+    .spot-title { font-family:var(--display); text-transform:uppercase; font-size:clamp(2.6rem,6vw,4.6rem); line-height:0.9; color:var(--ink); margin:10px 0 16px; }
+    .spot-title em { font-style:normal; color:var(--orange); }
+    .spot-desc { color:var(--ink-soft); max-width:46ch; margin-bottom:24px; }
+    .spot-desc b { color:var(--cobalt); font-weight:800; }
+
+    /* mini player */
+    .player { display:flex; align-items:center; gap:16px; padding:14px 18px; background:var(--cream); border:3px solid var(--ink); margin-bottom:22px; }
+    .player-play { flex-shrink:0; width:46px; height:46px; border-radius:50%; border:3px solid var(--ink); background:var(--gold); color:var(--ink);
+      font-size:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .15s, background .2s; }
+    .player-play:hover { transform:scale(1.06); background:var(--orange-bright); }
+    .player-wave { flex:1; display:flex; align-items:center; gap:2px; height:38px; overflow:hidden; cursor:pointer; }
+    .player-wave span { flex:1; min-width:2px; background:var(--line-strong); border-radius:1px; transition:background .12s; }
+    .player-wave span.played { background:var(--cobalt); }
+    .player-wave span.cursor { background:var(--orange); }
+    .player-meta { flex-shrink:0; font-family:var(--pixel); font-size:0.56rem; letter-spacing:0.05em; color:var(--ink-soft); text-transform:uppercase; }
+
+    .spot-links { display:flex; flex-wrap:wrap; gap:10px; }
+
+    /* ── Ficha (release detail) ── */
+    .ficha { margin-top:clamp(36px,5vw,56px); background:var(--green); color:var(--cream-2); border:3px solid var(--ink); box-shadow:10px 10px 0 0 var(--gold); padding:clamp(26px,4vw,46px); }
+    .ficha-top { display:flex; justify-content:space-between; align-items:flex-end; gap:22px; flex-wrap:wrap; margin-bottom:clamp(22px,3vw,34px); }
+    .ficha .date { font-family:var(--display); text-transform:uppercase; font-size:clamp(2rem,6vw,4rem); line-height:0.94; color:var(--cream-2); }
+    .ficha .date em { font-style:normal; color:var(--gold); }
+    .ficha-top .listen { font-family:var(--body); font-weight:800; font-size:clamp(1rem,1.8vw,1.3rem); line-height:1.25; color:var(--mint); max-width:26ch; }
+    .meta-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:22px; border-top:2px solid rgba(255,251,230,0.28); padding-top:clamp(20px,3vw,28px); }
+    .meta-grid dt { font-family:var(--pixel); font-size:0.56rem; color:var(--mint); margin-bottom:7px; }
+    .meta-grid dd { color:var(--cream-2); font-weight:800; font-size:0.96rem; }
+
+    /* ── Discografía ── */
+    .disco-group { margin-bottom:clamp(36px,5vw,56px); }
+    .disco-group-head { display:flex; align-items:center; gap:14px; margin-bottom:clamp(18px,2.5vw,28px); padding-bottom:12px; border-bottom:2px solid var(--ink); }
+    .disco-group-head .accent-bar { flex-shrink:0; }
+    .disco-group-label { font-family:var(--display); text-transform:uppercase; font-size:clamp(1.1rem,2vw,1.5rem); color:var(--ink); line-height:1; }
+    .disco-group-label em { font-style:normal; color:var(--orange); }
+    .disco-group-label .co { color:var(--cobalt); }
+    .disco-group-sub { font-family:var(--pixel); font-size:0.56rem; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.03em; margin-left:auto; white-space:nowrap; }
+    .disco-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:clamp(14px,2vw,22px); }
+    .disco-item { display:flex; flex-direction:column; position:relative; }
+    .disco-cover-wrap { position:relative; aspect-ratio:1; overflow:hidden; border:3px solid var(--ink); background:var(--cream); transition:transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s, border-color .2s; transform-origin:center; will-change:transform; }
+    .disco-cover-wrap[data-audio] { cursor:pointer; }
+    /* enlarge: on hover (fine pointer) OR when opened/pinned via JS */
+    .disco-item:hover, .disco-item.open { z-index:30; }
+    @media (hover:hover) and (pointer:fine) {
+      .disco-item:hover .disco-cover-wrap { transform:scale(1.42); box-shadow:0 22px 44px -14px rgba(28,26,24,.6); }
+    }
+    .disco-cover-wrap.open { transform:scale(1.42); box-shadow:0 22px 44px -14px rgba(28,26,24,.6); }
+    @media (hover:none) { .disco-cover-wrap.open { transform:scale(1.06); } }
+    .disco-cover-wrap.playing { border-color:var(--gold); }
+
+    /* bottom control bar: equalizer + play / pin buttons */
+    .disco-bar { position:absolute; left:0; right:0; bottom:0; display:none; align-items:center; gap:7px; padding:7px 8px; z-index:5;
+      background:linear-gradient(transparent, rgba(28,26,24,0.92) 58%); }
+    .disco-cover-wrap[data-audio].open .disco-bar { display:flex; }
+    @media (hover:hover) and (pointer:fine) {
+      .disco-item:hover .disco-cover-wrap[data-audio] .disco-bar { display:flex; }
+    }
+    .disco-eq { display:flex; align-items:flex-end; gap:2.5px; height:14px; flex-shrink:0; visibility:hidden; }
+    .disco-cover-wrap.playing .disco-eq { visibility:visible; }
+    .disco-eq i { width:3px; height:4px; background:var(--gold); display:block; animation:eqbar .9s ease-in-out infinite; }
+    .disco-eq i:nth-child(2){ animation-delay:.18s; background:var(--orange-bright); }
+    .disco-eq i:nth-child(3){ animation-delay:.36s; }
+    .disco-eq i:nth-child(4){ animation-delay:.12s; background:var(--mint); }
+    @keyframes eqbar { 0%,100%{ height:4px } 50%{ height:13px } }
+    .disco-actions { display:flex; gap:5px; margin-left:auto; }
+    .dc-btn { font-family:var(--pixel); font-size:0.5rem; letter-spacing:0.02em; text-transform:uppercase; color:var(--cream-2);
+      background:rgba(255,255,255,0.14); border:1.5px solid var(--cream-2); padding:5px 7px; line-height:1; cursor:pointer; white-space:nowrap;
+      -webkit-tap-highlight-color:transparent; touch-action:manipulation; transition:background .15s, color .15s; }
+    .dc-btn:hover { background:var(--cream-2); color:var(--ink); }
+    .dc-play { min-width:24px; text-align:center; }
+    .dc-pin.active { background:var(--gold); color:var(--ink); border-color:var(--ink); }
+
+    /* ── Lightbox (press images) ── */
+    .gallery-item { cursor:zoom-in; }
+    .gallery-item::after { content:"Clic \00B7 ampliar / descargar"; position:absolute; right:8px; top:8px; font-family:var(--pixel); font-size:0.5rem; letter-spacing:0.02em; text-transform:uppercase; color:var(--cream-2); background:var(--cobalt); border:2px solid var(--ink); padding:5px 7px; opacity:0; transform:translateY(-4px); transition:.25s ease; z-index:3; pointer-events:none; }
+    .gallery-item:hover::after { opacity:1; transform:none; }
+    .lightbox { position:fixed; inset:0; z-index:1000; display:none; align-items:center; justify-content:center; background:rgba(20,18,16,.88); padding:clamp(20px,4vw,56px); }
+    .lightbox.open { display:flex; }
+    .lightbox-fig { position:relative; max-width:min(1000px,92vw); display:flex; flex-direction:column; gap:14px; transform:scale(.82); opacity:0; transition:transform .42s cubic-bezier(.2,.7,.2,1), opacity .34s ease; }
+    .lightbox.open .lightbox-fig { transform:scale(1); opacity:1; }
+    .lightbox-img { max-width:100%; max-height:78vh; object-fit:contain; display:block; border:3px solid var(--ink); background:var(--cream); box-shadow:14px 14px 0 0 var(--cobalt); }
+    .lightbox-bar { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+    .lightbox-cap { font-family:var(--pixel); font-size:0.62rem; letter-spacing:0.03em; text-transform:uppercase; color:var(--cream-2); }
+    .lightbox-dl { font-family:var(--pixel); font-size:0.62rem; letter-spacing:0.02em; text-transform:uppercase; padding:12px 18px; border:3px solid var(--cream-2); background:var(--gold); color:var(--ink); display:inline-flex; align-items:center; gap:9px; }
+    .lightbox-dl:hover { background:var(--cream-2); transform:translate(-2px,-2px); box-shadow:4px 4px 0 0 var(--cream-2); }
+    .lightbox-dl .arr { color:var(--cobalt); }
+    .lightbox-close { position:absolute; top:-16px; right:-16px; width:42px; height:42px; border-radius:50%; border:3px solid var(--cream-2); background:var(--ink); color:var(--cream-2); font-family:var(--body); font-size:18px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform .18s, background .2s; }
+    .lightbox-close:hover { transform:scale(1.1); background:var(--orange); }
+    @media (max-width:560px){ .lightbox-close{ top:-8px; right:-8px; } }
+    .disco-cover { width:100%; height:100%; object-fit:cover; display:block; }
+    .disco-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:var(--cream-2); border:0; }
+    .disco-placeholder span { font-family:var(--display); text-transform:uppercase; font-size:0.9rem; color:var(--line-strong); text-align:center; padding:8px; line-height:1.1; }
+    .disco-meta { padding:10px 2px 0; }
+    .disco-title-label { font-family:var(--display); text-transform:uppercase; font-size:1.05rem; line-height:0.96; color:var(--ink); letter-spacing:0.01em; }
+    .disco-type-label { font-family:var(--pixel); font-size:0.54rem; letter-spacing:0.03em; color:var(--orange); text-transform:uppercase; margin-top:6px; }
+    .disco-type-label.co { color:var(--cobalt); }
+    .disco-new { display:inline-block; font-family:var(--pixel); font-size:0.5rem; background:var(--gold); color:var(--ink); padding:3px 6px; margin-left:7px; vertical-align:middle; }
+
+    /* ── Galería ── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      grid-template-rows: 320px 260px;
+      gap: 12px;
+    }
+    .gallery-item { position:relative; overflow:hidden; border:3px solid var(--ink); background:var(--cream); }
+    .gallery-item img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .6s ease; }
+    .gallery-item:hover img { transform:scale(1.04); }
+    .gallery-item.tall { grid-row: 1 / span 2; }
+    .gallery-item.wide { grid-column: 2; grid-row: 1; }
+    .gallery-item.sq   { grid-column: 2; grid-row: 2; }
+    .gallery-tag { position:absolute; left:0; bottom:0; background:var(--ink); color:var(--cream-2); font-family:var(--pixel); font-size:0.54rem; letter-spacing:0.03em; text-transform:uppercase; padding:6px 9px; z-index:2; }
+
+    /* ── En vivo ── */
+    .live-list { display:flex; flex-direction:column; border-top:2px solid var(--ink); }
+    .live-row { display:grid; grid-template-columns:96px 1fr auto auto; align-items:center; gap:24px; padding:22px 4px; border-bottom:2px solid var(--line); transition:padding-left .25s, background .25s; }
+    .live-row:hover { padding-left:14px; background:rgba(255,251,230,0.35); }
+    .live-date { font-family:var(--display); font-size:1.8rem; line-height:0.92; color:var(--cobalt); text-transform:uppercase; }
+    .live-date small { display:block; font-family:var(--pixel); font-size:0.54rem; letter-spacing:0.04em; color:var(--ink-soft); }
+    .live-name { font-family:var(--display); text-transform:uppercase; font-size:1.5rem; letter-spacing:0.02em; color:var(--ink); line-height:1; }
+    .live-place { font-family:var(--pixel); font-size:0.56rem; letter-spacing:0.03em; color:var(--ink-soft); margin-top:6px; }
+    .live-city { font-family:var(--pixel); font-size:0.56rem; letter-spacing:0.04em; color:var(--ink-soft); text-transform:uppercase; }
+    .live-cta { font-family:var(--pixel); font-size:0.56rem; letter-spacing:0.03em; text-transform:uppercase; color:var(--ink); border:2px solid var(--ink); padding:9px 14px; white-space:nowrap; }
+    .live-cta:hover { background:var(--orange); color:var(--cream-2); border-color:var(--ink); }
+
+    /* ── Plataformas grid ── */
+    .platforms-grid { display:flex; flex-wrap:wrap; gap:11px; }
+    .platform-link { display:inline-flex; align-items:center; gap:10px; font-family:var(--pixel); font-size:0.62rem; letter-spacing:0.03em; text-transform:uppercase;
+      padding:13px 18px; border:3px solid var(--ink); color:var(--ink); background:var(--cream); }
+    .platform-link:hover { transform:translate(-2px,-2px); box-shadow:4px 4px 0 0 var(--cobalt); }
+    .platform-link .platform-icon { width:15px; height:15px; fill:currentColor; flex-shrink:0; }
+
+    /* ── Contacto ── */
+    .contact-block { background:var(--cobalt); color:var(--cream-2); border:3px solid var(--ink); box-shadow:12px 12px 0 0 var(--gold); padding:clamp(30px,5vw,60px); }
+    .contact-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:clamp(28px,5vw,56px); align-items:center; }
+    .contact-left h2 { font-family:var(--display); text-transform:uppercase; font-size:clamp(2.6rem,7vw,5.4rem); line-height:0.86; color:var(--cream-2); margin-bottom:24px; }
+    .contact-left h2 em { font-style:normal; color:var(--gold); }
+    .contact-email { font-family:var(--pixel); font-size:0.78rem; letter-spacing:0.02em; color:var(--cream-2); border-bottom:2px solid var(--mint); padding-bottom:3px; display:inline-block; }
+    .contact-email:hover { color:var(--gold); border-color:var(--gold); }
+    .contact-city { font-family:var(--pixel); font-size:0.56rem; letter-spacing:0.06em; color:var(--mint); margin-top:14px; text-transform:uppercase; }
+    .contact-socials { margin-top:26px; display:flex; flex-wrap:wrap; gap:9px; }
+    .contact-socials a { font-family:var(--pixel); font-size:0.56rem; text-transform:uppercase; color:var(--cream-2); border:2px solid var(--cream-2); padding:8px 12px; }
+    .contact-socials a:hover { background:var(--cream-2); color:var(--cobalt); }
+    .contact-right { display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+    .barcode-inner { display:flex; gap:2.5px; align-items:flex-end; height:64px; }
+    .barcode-inner span { display:block; background:var(--cream-2); border-radius:0.5px; }
+    .barcode-cap { font-family:var(--pixel); font-size:0.5rem; letter-spacing:0.08em; color:var(--mint); text-transform:uppercase; }
+
+    /* ── Footer ── */
+    .footer-credits { border-top:2px solid var(--ink); padding-top:26px; padding-bottom:40px; display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+    .footer-credits p { font-family:var(--pixel); font-size:0.56rem; letter-spacing:0.03em; color:var(--ink-soft); }
+
+    /* ── Reveal ── */
+    .reveal { opacity:0; transform:translateY(22px); transition:opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1); }
+    .reveal.in { opacity:1; transform:none; }
+
+    /* ── Responsive ── */
+    @media (max-width:980px) {
+      .hero-grid { grid-template-columns:1fr; align-items:start; gap:clamp(30px,6vw,42px); }
+      .cover-col { flex-direction:column-reverse; align-items:stretch; gap:18px; }
+      .cover { max-width:none; width:100%; }
+      .cover-col .vortex { align-self:flex-start; }
+    }
+    @media (max-width:860px) {
+      .bio-grid, .spotlight-grid, .contact-grid { grid-template-columns:1fr; }
+      .spotlight-grid .spot-cover { max-width:360px; }
+      .sec-head { grid-template-columns:1fr; gap:12px; }
+      .sec-idx { padding-top:0; }
+      .display { font-size:clamp(3.4rem,16vw,6rem); }
+      .ficha-top { flex-direction:column; align-items:flex-start; }
+      .stream-in { flex-direction:column; align-items:flex-start; gap:16px; }
+      .gallery-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+      .gallery-item.tall, .gallery-item.wide, .gallery-item.sq { grid-column: 1; grid-row: auto; height: 260px; }
+      .live-row { grid-template-columns:72px 1fr; gap:14px 16px; }
+      .live-city { grid-column:2; }
+      .live-cta { grid-column:2; justify-self:start; margin-top:4px; }
+      .contact-right { align-items:flex-start; }
+    }
+    @media (max-width:560px) {
+      .topbar .coord { display:none; }
+      .footer-credits { flex-direction:column; align-items:flex-start; gap:8px; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      .vortex .spin { animation:none; }
+      .reveal { opacity:1; transform:none; transition:none; }
+      .disco-eq i { animation:none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ════ TOP BAR ════ -->
+  <div class="topbar">
+    <div class="wrap">
+      <div class="row">
+        <div class="mark">PURPUL<span>·</span>MATE</div>
+        <div class="pixel">Electronic Press Kit</div>
+        <div class="pixel co coord">CAT PM-013 / Música Nacional Col.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ HERO ════ -->
+  <header class="hero wrap" data-screen-label="hero">
+    <div class="kicker-row reveal">
+      <span class="pixel co">EPK</span><span class="sep">/</span>
+      <span class="pixel">Productor · Ingeniero · Artista</span><span class="sep">/</span>
+      <span class="pixel">Bogotá · Colombia</span>
+    </div>
+
+    <div class="hero-grid">
+      <div class="reveal" style="transition-delay:.07s">
+        <h1 class="display">Purpul<span class="l2">mate</span></h1>
+        <div class="ft"><span class="accent-bar"></span>ALIAS DE <b>MATEO SÁNCHEZ</b></div>
+        <p class="tagline">Hip-hop, electrónica y cantautorismo nacidos en la tensión entre el barrio y el estudio.</p>
+        <div class="hero-tags">
+          <span class="tagpill"><b>Hip-Hop</b> · Electrónica</span>
+          <span class="tagpill or"><b>Cantautorismo</b></span>
+          <span class="tagpill"><b>Producción</b> · Mezcla · Máster</span>
+          <span class="tagpill">Bogotá · COL</span>
+        </div>
+      </div>
+
+      <div class="cover-col reveal" style="transition-delay:.14s">
+        <div class="cover">
+          <img src="assets/cover-main.jpg" alt="Purpulmate — arte de portada">
+          <div class="tag"><span class="pixel">Identidad</span><span class="pixel or">PM-013</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Streaming band -->
+    <div class="stream reveal" style="transition-delay:.2s">
+      <div class="stream-in">
+        <div class="lbl"><span class="accent-bar"></span><span class="pixel">Escúchalo en tu plataforma</span></div>
+        <div class="links">
+          <a class="plat primary" href="https://open.spotify.com/intl-es/artist/0qL2PZw5RhaEzBYLLZbg0z" target="_blank" rel="noopener">Spotify →</a>
+          <a class="plat" href="https://music.apple.com/co/artist/purpulmate/1586680865" target="_blank" rel="noopener">Apple Music →</a>
+          <a class="plat" href="https://www.deezer.com/es/artist/145747842" target="_blank" rel="noopener">Deezer →</a>
+          <a class="plat" href="https://tidal.com/artist/28459442" target="_blank" rel="noopener">Tidal →</a>
+          <a class="plat" href="https://music.amazon.com/artists/B09GJSGTJM/purpulmate" target="_blank" rel="noopener">Amazon →</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ════ §01 ARTISTA / BIO ════ -->
+  <section class="wrap" data-screen-label="bio">
+    <div class="sec-head reveal">
+      <div class="sec-idx">§ 01 / Artista</div>
+      <h2 class="sec-title">Sobre <em>Purpulmate</em></h2>
+    </div>
+
+    <div class="bio-grid reveal" style="transition-delay:.08s">
+      <div class="brand-art">
+        <img src="assets/photo-portrait.jpg" alt="Purpulmate / Leonardo Espejo">
+        <div class="tag">@ Bogotá, Colombia</div>
+      </div>
+
+      <div class="bio-text">
+        <h3 class="bio-name">Productor.<em>Artista.</em></h3>
+        <p>
+          Detrás de <strong>Purpulmate</strong> está <em>Mateo Sánchez</em>, productor musical, ingeniero de mezcla y máster, y artista de hip-hop, electrónica y cantautorismo radicado en Bogotá, Colombia. Publica su música bajo dos alias — <strong>Purpulmate</strong> y <strong>Leonardo Espejo</strong> — como dos formas de nombrar un mismo proyecto: todo parte de Bogotá.
+        </p>
+        <p>
+          Su catálogo recorre territorios del <strong>rap instrumental</strong>, la experimentación electrónica, el sampleo orgánico y el <strong>cantautorismo</strong>, siempre anclado a una estética que reconoce la ciudad y la transforma. Como ingeniero produce, mezcla y masteriza sus propios lanzamientos, y ha trabajado como técnico para artistas de la escena independiente colombiana, aportando su firma sonora a proyectos de distintos géneros.
+        </p>
+
+        <div class="bio-credo">Bogotá como punto de partida.<br><em>El sonido como lenguaje universal.</em></div>
+
+        <div class="bio-meta">
+          <span class="tagpill"><b>Hip-Hop</b></span>
+          <span class="tagpill"><b>Electrónica</b></span>
+          <span class="tagpill or"><b>Cantautorismo</b></span>
+          <span class="tagpill"><b>Rap</b></span>
+          <span class="tagpill">Instrumental</span>
+          <span class="tagpill">Bogotá · COL</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ §02 ÚLTIMO LANZAMIENTO ════ -->
+  <section class="wrap spot-section" data-screen-label="spotlight">
+    <div class="sec-head reveal">
+      <div class="sec-idx">§ 02 / Último lanzamiento</div>
+      <h2 class="sec-title">De vértice<br><em>a vórtice</em></h2>
+    </div>
+
+    <div class="spotlight-grid reveal" style="transition-delay:.08s">
+      <div class="spot-cover">
+        <span class="spot-badge">Nuevo sencillo · 2026</span>
+        <img src="assets/de-vertice-a-vortice.jpg" alt="De Vértice a Vórtice">
+      </div>
+
+      <div class="spot-info">
+        <span class="spot-type">Sencillo · Purpulmate ft. Wayra</span>
+        <h3 class="spot-title">Mudar<br>de <em>piel</em></h3>
+        <p class="spot-desc">
+          El nuevo sencillo. Una pieza de <b>boom bap</b> — un viaje del punto fijo al remolino: el sonido de Bogotá girando sobre su propio eje.
+        </p>
+
+        <audio id="dvv-audio" src="assets/de-vertice-a-vortice.mp3" preload="metadata"></audio>
+        <div class="player" data-audio="dvv-audio">
+          <button class="player-play" aria-label="Reproducir / pausar">▶</button>
+          <div class="player-wave" id="wave-spotlight"></div>
+          <span class="player-meta"><span class="player-cur">0:00</span> / <span class="player-dur">--:--</span></span>
+        </div>
+
+        <div class="spot-links">
+          <a class="btn solid" href="https://open.spotify.com/intl-es/artist/0qL2PZw5RhaEzBYLLZbg0z" target="_blank" rel="noopener">Spotify <span class="arr">→</span></a>
+          <a class="btn" href="https://music.apple.com/co/artist/purpulmate/1586680865" target="_blank" rel="noopener">Apple Music <span class="arr">→</span></a>
+          <a class="btn" href="https://www.youtube.com/@purpulmate" target="_blank" rel="noopener">YouTube <span class="arr">→</span></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ficha técnica -->
+    <div class="ficha reveal" style="transition-delay:.12s">
+      <div class="ficha-top">
+        <div class="date">Estreno <em>18.06.26</em></div>
+        <p class="listen">Soltar el pasado y mudar de piel — caos, muerte y renacimiento constante.</p>
+      </div>
+      <dl class="meta-grid">
+        <div><dt>Artista</dt><dd>Purpulmate</dd></div>
+        <div><dt>Colaboración</dt><dd>ft. Wayra</dd></div>
+        <div><dt>Género</dt><dd>Boom Bap · Hip-Hop</dd></div>
+        <div><dt>Producción</dt><dd>Producción propia</dd></div>
+        <div><dt>Origen</dt><dd>Bogotá · Colombia</dd></div>
+        <div><dt>Catálogo</dt><dd>PM-013 · Música Nacional Col.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ════ §03 DISCOGRAFÍA ════ -->
+  <section class="wrap" data-screen-label="discografia">
+    <div class="sec-head reveal">
+      <div class="sec-idx">§ 03 / Discografía</div>
+      <h2 class="sec-title">Catálogo</h2>
+    </div>
+
+    <div class="reveal" style="transition-delay:.06s">
+
+      <!-- Grupo 1: Sencillos -->
+      <div class="disco-group">
+        <div class="disco-group-head">
+          <span class="accent-bar" style="background:var(--cobalt)"></span>
+          <span class="disco-group-label"><span class="co">Sencillos</span></span>
+          <span class="disco-group-sub">7 lanzamientos</span>
+        </div>
+        <div class="disco-grid">
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/de-vertice-a-vortice.wav"><img class="disco-cover" src="assets/de-vertice-a-vortice.jpg" alt="De Vértice a Vórtice" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">De Vértice a Vórtice <span class="disco-new">Nuevo</span></div><div class="disco-type-label">Sencillo · ft. Wayra</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/afuera-esta-el-sol.wav"><img class="disco-cover" src="assets/afuera-esta-el-sol.jpg" alt="Afuera Está el Sol" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Afuera Está el Sol</div><div class="disco-type-label">Sencillo · ft. Sania</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/la-cumbia-brava.wav"><img class="disco-cover" src="assets/la-cumbia-brava.jpg" alt="La Cumbia Brava" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">La Cumbia Brava</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/sinoirme.wav"><img class="disco-cover" src="assets/sinoirme.jpg" alt="Sinoirme" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Sinoirme</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/como-samsa.wav"><img class="disco-cover" src="assets/como-samsa.jpg" alt="Como Samsa en el Colchón" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Como Samsa en el Colchón</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/la-cueva.wav"><img class="disco-cover" src="assets/la-cueva.jpg" alt="La Cueva" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">La Cueva</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/dia-siguiente.wav"><img class="disco-cover" src="assets/dia-siguiente.jpg" alt="Día Siguiente" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Día Siguiente</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grupo 2: Periplo -->
+      <div class="disco-group">
+        <div class="disco-group-head">
+          <span class="accent-bar" style="background:var(--green)"></span>
+          <span class="disco-group-label">Periplo</span>
+          <span class="disco-group-sub">9 lanzamientos</span>
+        </div>
+        <div class="disco-grid">
+          <div class="disco-item">
+            <div class="disco-cover-wrap"><img class="disco-cover" src="assets/periplo.jpg" alt="Periplo" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Periplo</div><div class="disco-type-label co">Álbum</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/periplo-a-mi-valle-de-atriz.wav"><img class="disco-cover" src="assets/periplo-a-mi-valle-de-atriz.png" alt="A Mi Valle de Atriz" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">A Mi Valle de Atriz</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/periplo-amor-equivocado.wav"><img class="disco-cover" src="assets/periplo-amor-equivocado.png" alt="Amor Equivocado" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Amor Equivocado</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/periplo-bombona.wav"><img class="disco-cover" src="assets/periplo-bombona.png" alt="Bomboná" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Bomboná</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/periplo-cachiri.wav"><img class="disco-cover" src="assets/periplo-cachiri.png" alt="Cachirí" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Cachirí</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/periplo-chachagui.wav"><img class="disco-cover" src="assets/periplo-chachagui.png" alt="Chachagui" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Chachagui</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/periplo-pastucita.wav"><img class="disco-cover" src="assets/periplo-pastucita.png" alt="Pastucita" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Pastucita</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/periplo-sandona.wav"><img class="disco-cover" src="assets/periplo-sandona.png" alt="Sandoná" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Sandoná</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/periplo-son-sureno.wav"><img class="disco-cover" src="assets/periplo-son-sureno.png" alt="Son Sureño" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Son Sureño</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grupo 3: Errantes Anónimos -->
+      <div class="disco-group">
+        <div class="disco-group-head">
+          <span class="accent-bar" style="background:var(--orange)"></span>
+          <span class="disco-group-label">Errantes <em>Anónimos</em></span>
+          <span class="disco-group-sub">5 lanzamientos</span>
+        </div>
+        <div class="disco-grid">
+          <div class="disco-item">
+            <div class="disco-cover-wrap"><img class="disco-cover" src="assets/errantes-anonimos.jpg" alt="Errantes Anónimos" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Errantes Anónimos</div><div class="disco-type-label co">Álbum</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/defensa-propia.wav"><img class="disco-cover" src="assets/defensa-propia.jpg" alt="Defensa Propia" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Defensa Propia</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/dejar-de-ser-yo.wav"><img class="disco-cover" src="assets/dejar-de-ser-yo.jpg" alt="Dejar de Ser Yo" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Dejar de Ser Yo</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/el-yo.wav"><img class="disco-cover" src="assets/el-yo.jpg" alt="El Yo" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">El Yo</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/volverse-todo.wav"><img class="disco-cover" src="assets/volverse-todo.jpg" alt="Volverse Todo" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Volverse Todo</div><div class="disco-type-label">Sencillo · ft. Natalia Serna</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ════ §04 GALERÍA ════ -->
+  <section class="wrap" data-screen-label="galeria">
+    <div class="sec-head reveal">
+      <div class="sec-idx">§ 04 / Galería</div>
+      <h2 class="sec-title">Imágenes <em>de prensa</em></h2>
+    </div>
+
+    <p class="pixel co reveal" style="margin-bottom:clamp(20px,3vw,28px);">Haz clic en cualquier imagen para ampliarla y descargarla en alta resolución para medios.</p>
+
+    <div class="gallery-grid reveal" style="transition-delay:.06s">
+      <div class="gallery-item tall">
+        <span class="gallery-tag">Retrato · Bogotá</span>
+        <img src="assets/photo-portrait.jpg" alt="Purpulmate / Mateo Sánchez" loading="lazy">
+      </div>
+      <div class="gallery-item wide">
+        <span class="gallery-tag">En la calle · Bogotá</span>
+        <img src="assets/photo-street.jpg" alt="Purpulmate en Bogotá" loading="lazy">
+      </div>
+      <div class="gallery-item sq">
+        <span class="gallery-tag">Identidad · PM-013</span>
+        <img src="assets/cover-main.jpg" alt="Arte de marca Purpulmate" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ §05 PLATAFORMAS ════ -->
+  <section class="wrap" data-screen-label="plataformas">
+    <div class="sec-head reveal">
+      <div class="sec-idx">§ 05 / Plataformas</div>
+      <h2 class="sec-title">Escúchalo <em>en</em></h2>
+    </div>
+
+    <div class="platforms-grid reveal" style="transition-delay:.06s">
+      <a class="platform-link" href="https://open.spotify.com/intl-es/artist/0qL2PZw5RhaEzBYLLZbg0z" target="_blank" rel="noopener">
+        <svg class="platform-icon" viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        Spotify
+      </a>
+      <a class="platform-link" href="https://music.apple.com/co/artist/purpulmate/1586680865" target="_blank" rel="noopener">
+        <svg class="platform-icon" viewBox="0 0 24 24"><path d="M23.994 6.124a9.23 9.23 0 00-.24-2.19c-.317-1.31-1.062-2.31-2.18-3.043a5.022 5.022 0 00-1.877-.726 10.496 10.496 0 00-1.564-.15c-.04-.003-.083-.01-.124-.013H5.986c-.152.01-.303.017-.455.026C4.786.07 4.043.15 3.34.428 2.1.958 1.84 1.79.406 3.225a5.023 5.023 0 00-.732 1.899A10.58 10.58 0 000 6.861c0 .063.005 5.51.007 8.647 0 .188.003.376.012.563.06 1.323.39 2.55 1.245 3.555.985 1.15 2.26 1.73 3.8 1.87.196.017.385.013.58.019.1.003.2.005.305.007h11.01c.27-.009.543-.009.812-.025 1.49-.121 2.82-.68 3.826-1.83.85-.977 1.175-2.16 1.25-3.43.018-.272.013-5.462.016-8.16l-.001-.003-.001-.002v-.002zM15.998 9.74v5.026l-.002.015c-.007.28-.068.55-.218.793a1.617 1.617 0 01-1.175.766 1.606 1.606 0 01-1.755-1.588 1.606 1.606 0 011.607-1.612c.28 0 .543.074.77.203V8.048l-4.614 1.335v5.64l-.002.013c-.007.28-.068.55-.218.793a1.617 1.617 0 01-1.174.766 1.606 1.606 0 01-1.756-1.588 1.606 1.606 0 011.607-1.612c.28 0 .543.074.77.204V7.341l6.16-1.782V9.74z"/></svg>
+        Apple Music
+      </a>
+      <a class="platform-link" href="https://www.youtube.com/@purpulmate" target="_blank" rel="noopener">
+        <svg class="platform-icon" viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+        YouTube
+      </a>
+      <a class="platform-link" href="https://www.deezer.com/es/artist/145747842" target="_blank" rel="noopener">Deezer</a>
+      <a class="platform-link" href="https://tidal.com/artist/28459442" target="_blank" rel="noopener">Tidal</a>
+      <a class="platform-link" href="https://music.amazon.com/artists/B09GJSGTJM/purpulmate" target="_blank" rel="noopener">Amazon Music</a>
+      <a class="platform-link" href="https://www.instagram.com/purpulmate" target="_blank" rel="noopener">
+        <svg class="platform-icon" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        Instagram
+      </a>
+    </div>
+  </section>
+
+  <!-- ════ CONTACTO ════ -->
+  <section class="wrap" data-screen-label="contacto">
+    <div class="contact-block reveal">
+      <div class="contact-grid">
+        <div class="contact-left">
+          <h2>Booking<br>&amp; <em>contacto</em></h2>
+          <a class="contact-email" href="/cdn-cgi/l/email-protection#cababfb8babfa6a7abbeaf8aada7aba3a6e4a9a5a7"><span class="__cf_email__" data-cfemail="fb8b8e898b8e97969a8f9ebb9c969a9297d5989496">[email&#160;protected]</span></a>
+          <p class="contact-city">Bogotá · Colombia · 2026</p>
+          <div class="contact-socials">
+            <a href="https://www.instagram.com/purpulmate" target="_blank" rel="noopener">@purpulmate</a>
+            <a href="https://open.spotify.com/intl-es/artist/0qL2PZw5RhaEzBYLLZbg0z" target="_blank" rel="noopener">Spotify</a>
+            <a href="https://www.youtube.com/@purpulmate" target="_blank" rel="noopener">YouTube</a>
+          </div>
+        </div>
+        <div class="contact-right">
+          <div class="barcode-inner" id="barcode-contact"></div>
+          <p class="barcode-cap">Música Nacional. Col.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-credits">
+      <p>PURPULMATE — Electronic Press Kit © 2026</p>
+      <p>Bogotá, Colombia · CAT PM-013</p>
+    </div>
+  </section>
+
+  <!-- ════ LIGHTBOX (prensa) ════ -->
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <figure class="lightbox-fig">
+      <button class="lightbox-close" aria-label="Cerrar">✕</button>
+      <img class="lightbox-img" alt="Imagen de prensa Purpulmate">
+      <figcaption class="lightbox-bar">
+        <span class="lightbox-cap"></span>
+        <a class="lightbox-dl" href="" download>Descargar para medios <span class="arr">↓</span></a>
+      </figcaption>
+    </figure>
+  </div>
+
+  <!-- ════ TWEAKS ════ -->
+  <div id="tweaks-root"></div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    /* ── Barcode generator ── */
+    function buildBarcode(containerId, barCount, minH, maxH) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const widths = [1, 1, 2, 1, 1, 2, 1, 3];
+      for (let i = 0; i < barCount; i++) {
+        const span = document.createElement('span');
+        const w = widths[i % widths.length];
+        const h = minH + Math.random() * (maxH - minH);
+        span.style.width = w + 'px';
+        span.style.height = Math.round(h) + 'px';
+        if (i % 4 === 0 && w === 1) span.style.opacity = '0.4';
+        container.appendChild(span);
+      }
+    }
+    buildBarcode('barcode-contact', 54, 30, 64);
+
+    /* ── Waveform player ── */
+    (function buildPlayer() {
+      const wave = document.getElementById('wave-spotlight');
+      const playerEl = document.querySelector('.player[data-audio]');
+      if (!wave || !playerEl) return;
+      const audio = document.getElementById(playerEl.dataset.audio);
+      const playBtn = playerEl.querySelector('.player-play');
+      const curEl = playerEl.querySelector('.player-cur');
+      const durEl = playerEl.querySelector('.player-dur');
+      const bars = 64;
+      for (let i = 0; i < bars; i++) {
+        const span = document.createElement('span');
+        const env = Math.sin((i / bars) * Math.PI);
+        const h = 12 + (env * 0.55 + Math.random() * 0.45) * 88;
+        span.style.height = Math.max(8, Math.min(100, h)) + '%';
+        wave.appendChild(span);
+      }
+      const barEls = Array.from(wave.children);
+      function fmt(t) {
+        if (!isFinite(t)) return '--:--';
+        const m = Math.floor(t / 60), s = Math.floor(t % 60);
+        return m + ':' + String(s).padStart(2, '0');
+      }
+      function paint() {
+        const ratio = audio.duration ? audio.currentTime / audio.duration : 0;
+        const idx = Math.round(ratio * bars);
+        barEls.forEach((b, i) => {
+          b.classList.toggle('played', i < idx);
+          b.classList.toggle('cursor', i === idx && !audio.paused);
+        });
+      }
+      audio.addEventListener('loadedmetadata', () => { durEl.textContent = fmt(audio.duration); });
+      audio.addEventListener('timeupdate', () => { curEl.textContent = fmt(audio.currentTime); paint(); });
+      audio.addEventListener('ended', () => { playBtn.textContent = '\u25B6'; paint(); });
+      playBtn.addEventListener('click', () => {
+        if (audio.paused) { audio.play(); playBtn.textContent = '\u275A\u275A'; }
+        else { audio.pause(); playBtn.textContent = '\u25B6'; }
+      });
+      wave.addEventListener('click', (e) => {
+        const r = wave.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+        if (audio.duration) audio.currentTime = ratio * audio.duration;
+      });
+    })();
+
+    /* ── Reveal on scroll ── */
+    (function () {
+      const els = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('in')); return; }
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
+      }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+      els.forEach(e => io.observe(e));
+    })();
+
+    /* ── Discography: hover/tap to play a fragment, with pin-to-keep-playing ── */
+    (function () {
+      const COVERS = document.querySelectorAll('.disco-cover-wrap[data-audio]');
+      if (!COVERS.length) return;
+      const hoverCapable = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+      const PLAY = '\u25B6', PAUSE = '\u275A\u275A';
+
+      // ONE shared audio element → it is physically impossible for two fragments
+      // to sound at the same time, even on very fast cursor sweeps.
+      const audio = new Audio();
+      audio.preload = 'none';
+      audio.loop = true;
+      let current = null;   // the cover that currently owns the audio
+      let token = 0;        // invalidates pending play() promises when we switch
+      let fadeRAF = 0;
+
+      function fadeTo(target, ms) {
+        cancelAnimationFrame(fadeRAF);
+        const from = audio.volume, t0 = performance.now();
+        (function step(t) {
+          const k = Math.min(1, (t - t0) / ms);
+          audio.volume = Math.max(0, Math.min(1, from + (target - from) * k));
+          if (k < 1) fadeRAF = requestAnimationFrame(step);
+        })(t0);
+      }
+
+      function startAudio(state) {
+        const my = ++token;
+        if (!audio.src || audio.src.indexOf(state.src) === -1) audio.src = state.src;
+        try { audio.currentTime = 0; } catch (e) {}
+        audio.volume = 0;
+        const p = audio.play();
+        if (p && p.then) p.then(() => { if (my === token) fadeTo(1, 200); }).catch(() => {});
+      }
+
+      function setPinned(state, val) {
+        state.pinned = val;
+        state.pinBtn.classList.toggle('active', val);
+        state.pinBtn.textContent = val ? 'Sonando' : 'Fijar';
+      }
+
+      function open(state) {
+        if (current && current !== state) hardClose(current);  // releases & unpins the previous
+        current = state;
+        state.wrap.classList.add('open');
+        state.item.classList.add('open');
+        startAudio(state);
+      }
+      function close(state) {                 // respects the pin
+        if (state.pinned) return;
+        hardClose(state);
+      }
+      function hardClose(state) {
+        setPinned(state, false);
+        state.wrap.classList.remove('open', 'playing');
+        state.item.classList.remove('open');
+        if (current === state) { token++; audio.pause(); current = null; }
+      }
+
+      // shared audio reflects its state only on the cover that owns it
+      audio.addEventListener('play',  () => { if (current) { current.wrap.classList.add('playing');    current.playBtn.textContent = PAUSE; } });
+      audio.addEventListener('pause', () => { if (current) { current.wrap.classList.remove('playing'); current.playBtn.textContent = PLAY;  } });
+
+      COVERS.forEach((wrap) => {
+        const item = wrap.closest('.disco-item');
+        const bar = document.createElement('div');
+        bar.className = 'disco-bar';
+        bar.innerHTML =
+          '<div class="disco-eq"><i></i><i></i><i></i><i></i></div>' +
+          '<div class="disco-actions">' +
+            '<button type="button" class="dc-btn dc-play" aria-label="Reproducir o pausar">' + PLAY + '</button>' +
+            '<button type="button" class="dc-btn dc-pin" aria-label="Dejar sonando">Fijar</button>' +
+          '</div>';
+        wrap.appendChild(bar);
+
+        const state = {
+          wrap, item, pinned: false,
+          src: wrap.getAttribute('data-audio'),
+          playBtn: bar.querySelector('.dc-play'),
+          pinBtn: bar.querySelector('.dc-pin')
+        };
+
+        if (hoverCapable) {
+          wrap.addEventListener('pointerenter', () => open(state));
+          wrap.addEventListener('pointerleave', () => close(state));
+        } else {
+          // touch: tap to open/play, tap again (off the buttons) to close
+          wrap.addEventListener('click', (e) => {
+            if (e.target.closest('.disco-actions')) return;
+            if (current === state && state.wrap.classList.contains('open')) hardClose(state);
+            else open(state);
+          });
+        }
+
+        state.playBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (current !== state) { open(state); return; }
+          if (audio.paused) startAudio(state); else audio.pause();
+        });
+        state.pinBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (current !== state) open(state);
+          setPinned(state, !state.pinned);
+        });
+      });
+    })();
+
+    /* ── Lightbox for press images ── */
+    (function () {
+      const lb = document.getElementById('lightbox');
+      if (!lb) return;
+      const img = lb.querySelector('.lightbox-img');
+      const cap = lb.querySelector('.lightbox-cap');
+      const dl = lb.querySelector('.lightbox-dl');
+      function fileName(src, caption) {
+        const ext = (src.split('.').pop() || 'jpg').split('?')[0];
+        const slug = caption.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '').toLowerCase();
+        return 'PURPULMATE-' + (slug || 'prensa') + '.' + ext;
+      }
+      function open(src, caption) {
+        img.src = src; cap.textContent = caption;
+        dl.href = src; dl.setAttribute('download', fileName(src, caption));
+        lb.classList.add('open'); lb.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+      document.querySelectorAll('.gallery-item').forEach((item) => {
+        const im = item.querySelector('img');
+        const tag = item.querySelector('.gallery-tag');
+        item.addEventListener('click', () => {
+          if (!im) return;
+          open(im.getAttribute('src'), tag ? tag.textContent.trim() : 'Purpulmate');
+        });
+      });
+      lb.addEventListener('click', (e) => {
+        if (e.target === lb || e.target.classList.contains('lightbox-close')) close();
+      });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    })();
+  </script>
+
+  <script type="text/babel">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "bg": "#E7C4DB",
+      "accent": "#0A5DAE",
+      "grain": true
+    }/*EDITMODE-END*/;
+
+    function EPKTweaks() {
+      const [t, setTweak] = window.useTweaks(TWEAK_DEFAULTS);
+
+      React.useEffect(() => {
+        document.documentElement.style.setProperty('--lilac', t.bg);
+      }, [t.bg]);
+
+      React.useEffect(() => {
+        const map = {
+          "#0A5DAE": { "--cobalt": "#0A5DAE", "--orange": "#C2691C" },
+          "#C2691C": { "--cobalt": "#C2691C", "--orange": "#0A5DAE" },
+          "#2F6B47": { "--cobalt": "#2F6B47", "--orange": "#C2691C" },
+        };
+        const colors = map[t.accent] || map["#0A5DAE"];
+        Object.entries(colors).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+      }, [t.accent]);
+
+      React.useEffect(() => {
+        document.documentElement.style.setProperty('--grain-opacity', t.grain ? '0.05' : '0');
+      }, [t.grain]);
+
+      return (
+        <window.TweaksPanel title="Tweaks">
+          <window.TweakSection label="Fondo" />
+          <window.TweakColor label="Color de fondo" value={t.bg}
+            options={["#E7C4DB", "#FBF6DF", "#BFE0C0"]}
+            onChange={v => setTweak("bg", v)} />
+          <window.TweakSection label="Acento" />
+          <window.TweakColor label="Color de acento" value={t.accent}
+            options={["#0A5DAE", "#C2691C", "#2F6B47"]}
+            onChange={v => setTweak("accent", v)} />
+          <window.TweakSection label="Textura" />
+          <window.TweakToggle label="Grain" value={t.grain}
+            onChange={v => setTweak("grain", v)} />
+        </window.TweaksPanel>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('tweaks-root')).render(<EPKTweaks />);
+  </script>
+
+</body>
+</html>
