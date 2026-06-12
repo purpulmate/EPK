@@ -134,7 +134,11 @@
     .vortex .spin { transform-origin:center; animation:rot 60s linear infinite; }
     @keyframes rot { to { transform:rotate(360deg); } }
     .cover { position:relative; width:100%; max-width:480px; aspect-ratio:1/1; border:3px solid var(--ink); background:var(--cream);
-      box-shadow:14px 14px 0 0 var(--cobalt); overflow:hidden; }
+      box-shadow:14px 14px 0 0 var(--cobalt); overflow:hidden; transform-origin:center;
+      transition:transform .42s cubic-bezier(.2,.7,.2,1), box-shadow .42s; will-change:transform; }
+    @media (hover:hover) and (pointer:fine) {
+      .cover:hover { transform:scale(1.07); box-shadow:22px 22px 0 0 var(--cobalt); }
+    }
     .cover img { width:100%; height:100%; object-fit:cover; display:block; }
     .cover .tag { position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:space-between; align-items:center;
       padding:7px 11px; background:var(--ink); }
@@ -218,12 +222,22 @@
     .disco-cover-wrap { position:relative; aspect-ratio:1; overflow:hidden; border:3px solid var(--ink); background:var(--cream); transition:transform .28s cubic-bezier(.2,.7,.2,1), box-shadow .28s, border-color .2s; transform-origin:center; will-change:transform; }
     .disco-cover-wrap[data-audio] { cursor:pointer; }
     /* enlarge: on hover (fine pointer) OR when opened/pinned via JS */
-    .disco-item:hover, .disco-item.open { z-index:30; }
+    .disco-item.open { z-index:30; }
+    .disco-item.front, .disco-item:hover { z-index:45; }
     @media (hover:hover) and (pointer:fine) {
-      .disco-item:hover .disco-cover-wrap { transform:scale(1.42); box-shadow:0 22px 44px -14px rgba(28,26,24,.6); }
+      .disco-item:hover .disco-cover-wrap { transform:scale(1.82); box-shadow:0 30px 58px -14px rgba(28,26,24,.64); }
     }
-    .disco-cover-wrap.open { transform:scale(1.42); box-shadow:0 22px 44px -14px rgba(28,26,24,.6); }
-    @media (hover:none) { .disco-cover-wrap.open { transform:scale(1.06); } }
+    .disco-cover-wrap.open { transform:scale(1.82); box-shadow:0 30px 58px -14px rgba(28,26,24,.64); }
+    /* the actively-hovered cover always sits ABOVE a pinned neighbour so it stays fully visible */
+    .disco-item.front .disco-cover-wrap.open { box-shadow:0 30px 60px -12px rgba(28,26,24,.7); }
+    @media (hover:none) {
+      .disco-cover-wrap.open { transform:scale(1.2); box-shadow:0 16px 32px -12px rgba(28,26,24,.55); }
+      /* on touch the bar is the primary control — make it always tappable when open */
+      .disco-bar { padding:9px 9px; gap:8px; }
+      .dc-btn { font-size:0.62rem; padding:9px 11px; border-width:2px; }
+      .dc-play { min-width:34px; }
+      .disco-eq { height:16px; }
+    }
     .disco-cover-wrap.playing { border-color:var(--gold); }
 
     /* bottom control bar: equalizer + play / pin buttons */
@@ -475,7 +489,10 @@
         <span class="spot-type">Sencillo · Purpulmate ft. Wayra</span>
         <h3 class="spot-title">Mudar<br>de <em>piel</em></h3>
         <p class="spot-desc">
-          El nuevo sencillo. Una pieza de <b>boom bap</b> — un viaje del punto fijo al remolino: el sonido de Bogotá girando sobre su propio eje.
+          El nuevo sencillo. Una pieza de <b>boom bap rolo y paisa</b> — un viaje del punto fijo al remolino: el sonido de Bogotá girando sobre su propio eje.
+        </p>
+        <p class="spot-desc">
+          La música de <b>Wayra</b> entra como contrapeso y complemento del relato: un fraseo que se mueve entre lo introspectivo y lo telúrico, sumando textura y otra cadencia al boom bap de Purpulmate. Su voz amplía el viaje del vértice al vórtice — comparte el mismo eje, pero lo hace girar desde otro lugar, y le da a <i>Mudar de piel</i> ese pulso a dos voces que sostiene la canción.
         </p>
 
         <audio id="dvv-audio" src="assets/de-vertice-a-vortice.mp3" preload="metadata"></audio>
@@ -532,12 +549,20 @@
             <div class="disco-meta"><div class="disco-title-label">De Vértice a Vórtice <span class="disco-new">Nuevo</span></div><div class="disco-type-label">Sencillo · ft. Wayra</div></div>
           </div>
           <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/la-cueva.wav"><img class="disco-cover" src="assets/la-cueva.jpg" alt="La Cueva" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">La Cueva</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/dia-siguiente.wav"><img class="disco-cover" src="assets/dia-siguiente.jpg" alt="Día Siguiente" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Día Siguiente</div><div class="disco-type-label">Sencillo</div></div>
+          </div>
+          <div class="disco-item">
             <div class="disco-cover-wrap" data-audio="assets/frag/afuera-esta-el-sol.wav"><img class="disco-cover" src="assets/afuera-esta-el-sol.jpg" alt="Afuera Está el Sol" loading="lazy"></div>
-            <div class="disco-meta"><div class="disco-title-label">Afuera Está el Sol</div><div class="disco-type-label">Sencillo · ft. Sania</div></div>
+            <div class="disco-meta"><div class="disco-title-label">Afuera Está el Sol</div><div class="disco-type-label">Sencillo · ft. Sania y Valeria Tamayo</div></div>
           </div>
           <div class="disco-item">
             <div class="disco-cover-wrap" data-audio="assets/frag/la-cumbia-brava.wav"><img class="disco-cover" src="assets/la-cumbia-brava.jpg" alt="La Cumbia Brava" loading="lazy"></div>
-            <div class="disco-meta"><div class="disco-title-label">La Cumbia Brava</div><div class="disco-type-label">Sencillo</div></div>
+            <div class="disco-meta"><div class="disco-title-label">La Cumbia Brava</div><div class="disco-type-label">Sencillo · ft. Samperro F1N0</div></div>
           </div>
           <div class="disco-item">
             <div class="disco-cover-wrap" data-audio="assets/frag/sinoirme.wav"><img class="disco-cover" src="assets/sinoirme.jpg" alt="Sinoirme" loading="lazy"></div>
@@ -545,15 +570,7 @@
           </div>
           <div class="disco-item">
             <div class="disco-cover-wrap" data-audio="assets/frag/como-samsa.wav"><img class="disco-cover" src="assets/como-samsa.jpg" alt="Como Samsa en el Colchón" loading="lazy"></div>
-            <div class="disco-meta"><div class="disco-title-label">Como Samsa en el Colchón</div><div class="disco-type-label">Sencillo</div></div>
-          </div>
-          <div class="disco-item">
-            <div class="disco-cover-wrap" data-audio="assets/frag/la-cueva.wav"><img class="disco-cover" src="assets/la-cueva.jpg" alt="La Cueva" loading="lazy"></div>
-            <div class="disco-meta"><div class="disco-title-label">La Cueva</div><div class="disco-type-label">Sencillo</div></div>
-          </div>
-          <div class="disco-item">
-            <div class="disco-cover-wrap" data-audio="assets/frag/dia-siguiente.wav"><img class="disco-cover" src="assets/dia-siguiente.jpg" alt="Día Siguiente" loading="lazy"></div>
-            <div class="disco-meta"><div class="disco-title-label">Día Siguiente</div><div class="disco-type-label">Sencillo</div></div>
+            <div class="disco-meta"><div class="disco-title-label">Como Samsa en el Colchón</div><div class="disco-type-label">Sencillo · ft. Samperro F1N0</div></div>
           </div>
         </div>
       </div>
@@ -618,10 +635,6 @@
             <div class="disco-meta"><div class="disco-title-label">Errantes Anónimos</div><div class="disco-type-label co">Álbum</div></div>
           </div>
           <div class="disco-item">
-            <div class="disco-cover-wrap" data-audio="assets/frag/defensa-propia.wav"><img class="disco-cover" src="assets/defensa-propia.jpg" alt="Defensa Propia" loading="lazy"></div>
-            <div class="disco-meta"><div class="disco-title-label">Defensa Propia</div><div class="disco-type-label">Sencillo</div></div>
-          </div>
-          <div class="disco-item">
             <div class="disco-cover-wrap" data-audio="assets/frag/dejar-de-ser-yo.wav"><img class="disco-cover" src="assets/dejar-de-ser-yo.jpg" alt="Dejar de Ser Yo" loading="lazy"></div>
             <div class="disco-meta"><div class="disco-title-label">Dejar de Ser Yo</div><div class="disco-type-label">Sencillo</div></div>
           </div>
@@ -632,6 +645,10 @@
           <div class="disco-item">
             <div class="disco-cover-wrap" data-audio="assets/frag/volverse-todo.wav"><img class="disco-cover" src="assets/volverse-todo.jpg" alt="Volverse Todo" loading="lazy"></div>
             <div class="disco-meta"><div class="disco-title-label">Volverse Todo</div><div class="disco-type-label">Sencillo · ft. Natalia Serna</div></div>
+          </div>
+          <div class="disco-item">
+            <div class="disco-cover-wrap" data-audio="assets/frag/defensa-propia.wav"><img class="disco-cover" src="assets/defensa-propia.jpg" alt="Defensa Propia" loading="lazy"></div>
+            <div class="disco-meta"><div class="disco-title-label">Defensa Propia</div><div class="disco-type-label">Sencillo</div></div>
           </div>
         </div>
       </div>
@@ -700,7 +717,7 @@
       <div class="contact-grid">
         <div class="contact-left">
           <h2>Booking<br>&amp; <em>contacto</em></h2>
-          <a class="contact-email" href="/cdn-cgi/l/email-protection#cababfb8babfa6a7abbeaf8aada7aba3a6e4a9a5a7"><span class="__cf_email__" data-cfemail="fb8b8e898b8e97969a8f9ebb9c969a9297d5989496">[email&#160;protected]</span></a>
+          <a class="contact-email" href="/cdn-cgi/l/email-protection#1f6f6a6d6f6a73727e6b7a5f78727e7673317c7072"><span class="__cf_email__" data-cfemail="9eeeebeceeebf2f3ffeafbdef9f3fff7f2b0fdf1f3">[email&#160;protected]</span></a>
           <p class="contact-city">Bogotá · Colombia · 2026</p>
           <div class="contact-socials">
             <a href="https://www.instagram.com/purpulmate" target="_blank" rel="noopener">@purpulmate</a>
@@ -809,70 +826,130 @@
       els.forEach(e => io.observe(e));
     })();
 
-    /* ── Discography: hover/tap to play a fragment, with pin-to-keep-playing ── */
+    /* ── Discography: hover/tap to preview, pin to keep playing exclusively ── */
     (function () {
-      const COVERS = document.querySelectorAll('.disco-cover-wrap[data-audio]');
-      if (!COVERS.length) return;
-      const hoverCapable = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+      const WRAPS = [...document.querySelectorAll('.disco-cover-wrap[data-audio]')];
+      if (!WRAPS.length) return;
+      const canHover = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
       const PLAY = '\u25B6', PAUSE = '\u275A\u275A';
 
-      // ONE shared audio element → it is physically impossible for two fragments
-      // to sound at the same time, even on very fast cursor sweeps.
+      // ONE shared audio element → two fragments can never sound at once.
       const audio = new Audio();
       audio.preload = 'none';
       audio.loop = true;
-      let current = null;   // the cover that currently owns the audio
-      let token = 0;        // invalidates pending play() promises when we switch
+
+      const states = [];
+      let pinned = null;    // pinned cover (exclusive audio) or null
+      let hovered = null;   // currently hovered / active-tapped cover or null
+      let owner = null;     // cover whose audio is currently loaded
+      let token = 0;        // invalidates stale play()/pause() async work
       let fadeRAF = 0;
 
       function fadeTo(target, ms) {
         cancelAnimationFrame(fadeRAF);
         const from = audio.volume, t0 = performance.now();
         (function step(t) {
-          const k = Math.min(1, (t - t0) / ms);
+          const k = Math.min(1, (t - t0) / Math.max(1, ms));
           audio.volume = Math.max(0, Math.min(1, from + (target - from) * k));
           if (k < 1) fadeRAF = requestAnimationFrame(step);
         })(t0);
       }
 
-      function startAudio(state) {
+      // A cover is enlarged if it is hovered OR pinned (so you can browse
+      // other covers visually while a pinned one keeps playing).
+      function renderVisual(s) {
+        const open = (s === hovered || s === pinned);
+        s.wrap.classList.toggle('open', open);
+        s.item.classList.toggle('open', open);
+        // the actively-hovered/tapped cover is brought to the front so it is
+        // never obscured by a pinned neighbour that is also enlarged.
+        s.item.classList.toggle('front', s === hovered);
+      }
+      function renderPlaying() {
+        states.forEach((s) => {
+          const live = (s === owner) && !audio.paused;
+          s.wrap.classList.toggle('playing', live);
+          s.playBtn.textContent = live ? PAUSE : PLAY;
+        });
+      }
+      function setPinUI(s, val) {
+        s.pinBtn.classList.toggle('active', val);
+        s.pinBtn.textContent = val ? 'Sonando' : 'Fijar';
+      }
+
+      // The cover that SHOULD own audio: a pin always wins over hover.
+      function desired() { return pinned || hovered; }
+
+      function syncAudio() {
+        const want = desired();
+        if (want === owner) { renderPlaying(); return; }
+        owner = want;
         const my = ++token;
-        if (!audio.src || audio.src.indexOf(state.src) === -1) audio.src = state.src;
+        if (!want) {
+          fadeTo(0, 150);
+          setTimeout(() => { if (my === token) { audio.pause(); renderPlaying(); } }, 165);
+          return;
+        }
+        if (audio.src.indexOf(want.src) === -1) audio.src = want.src;
         try { audio.currentTime = 0; } catch (e) {}
         audio.volume = 0;
         const p = audio.play();
-        if (p && p.then) p.then(() => { if (my === token) fadeTo(1, 200); }).catch(() => {});
+        if (p && p.then) p.then(() => { if (my === token) { fadeTo(1, 200); renderPlaying(); } })
+                          .catch(() => {});
+        renderPlaying();
       }
 
-      function setPinned(state, val) {
-        state.pinned = val;
-        state.pinBtn.classList.toggle('active', val);
-        state.pinBtn.textContent = val ? 'Sonando' : 'Fijar';
+      audio.addEventListener('play', renderPlaying);
+      audio.addEventListener('pause', renderPlaying);
+
+      function activate(s) {            // make s the hovered/active cover
+        if (hovered && hovered !== s) { const prev = hovered; hovered = s; renderVisual(prev); }
+        else hovered = s;
+        renderVisual(s);
+        syncAudio();
+      }
+      function deactivate(s) {          // s no longer hovered (pin keeps it open)
+        if (hovered === s) hovered = null;
+        renderVisual(s);
+        syncAudio();
+      }
+      function collapse(s) {            // explicit close on touch (ignores nothing; unpins if pinned)
+        if (pinned === s) { pinned = null; setPinUI(s, false); }
+        if (hovered === s) hovered = null;
+        renderVisual(s);
+        syncAudio();
       }
 
-      function open(state) {
-        if (current && current !== state) hardClose(current);  // releases & unpins the previous
-        current = state;
-        state.wrap.classList.add('open');
-        state.item.classList.add('open');
-        startAudio(state);
-      }
-      function close(state) {                 // respects the pin
-        if (state.pinned) return;
-        hardClose(state);
-      }
-      function hardClose(state) {
-        setPinned(state, false);
-        state.wrap.classList.remove('open', 'playing');
-        state.item.classList.remove('open');
-        if (current === state) { token++; audio.pause(); current = null; }
+      function togglePin(s) {
+        if (pinned === s) {             // un-pin: keep playing only while hovered
+          pinned = null;
+          setPinUI(s, false);
+          renderVisual(s);
+          syncAudio();
+          return;
+        }
+        if (pinned && pinned !== s) {   // move pin from another cover
+          const prev = pinned;
+          pinned = null; setPinUI(prev, false); renderVisual(prev);
+        }
+        pinned = s;
+        setPinUI(s, true);
+        renderVisual(s);
+        syncAudio();                    // pin wins → its audio plays exclusively
       }
 
-      // shared audio reflects its state only on the cover that owns it
-      audio.addEventListener('play',  () => { if (current) { current.wrap.classList.add('playing');    current.playBtn.textContent = PAUSE; } });
-      audio.addEventListener('pause', () => { if (current) { current.wrap.classList.remove('playing'); current.playBtn.textContent = PLAY;  } });
+      function togglePlay(s) {
+        if (owner === s) {              // pause / resume the current one
+          if (audio.paused) { audio.play().then(renderPlaying).catch(() => {}); }
+          else { audio.pause(); }
+          return;
+        }
+        // Explicit play on a different cover overrides any pin (deliberate action).
+        if (pinned && pinned !== s) { const prev = pinned; pinned = null; setPinUI(prev, false); renderVisual(prev); }
+        activate(s);
+      }
 
-      COVERS.forEach((wrap) => {
+      WRAPS.forEach((wrap) => {
         const item = wrap.closest('.disco-item');
         const bar = document.createElement('div');
         bar.className = 'disco-bar';
@@ -884,35 +961,29 @@
           '</div>';
         wrap.appendChild(bar);
 
-        const state = {
-          wrap, item, pinned: false,
+        const s = {
+          wrap, item,
           src: wrap.getAttribute('data-audio'),
           playBtn: bar.querySelector('.dc-play'),
           pinBtn: bar.querySelector('.dc-pin')
         };
+        states.push(s);
 
-        if (hoverCapable) {
-          wrap.addEventListener('pointerenter', () => open(state));
-          wrap.addEventListener('pointerleave', () => close(state));
+        if (canHover) {
+          wrap.addEventListener('pointerenter', () => activate(s));
+          wrap.addEventListener('pointerleave', () => deactivate(s));
         } else {
-          // touch: tap to open/play, tap again (off the buttons) to close
+          // Touch: tap a cover to open + play; tap the same one again to close.
           wrap.addEventListener('click', (e) => {
             if (e.target.closest('.disco-actions')) return;
-            if (current === state && state.wrap.classList.contains('open')) hardClose(state);
-            else open(state);
+            if (hovered === s || pinned === s) collapse(s);
+            else activate(s);
           });
         }
 
-        state.playBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (current !== state) { open(state); return; }
-          if (audio.paused) startAudio(state); else audio.pause();
-        });
-        state.pinBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (current !== state) open(state);
-          setPinned(state, !state.pinned);
-        });
+        // Buttons work on both pointer and touch.
+        s.playBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(s); });
+        s.pinBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePin(s); });
       });
     })();
 
